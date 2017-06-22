@@ -1,0 +1,33 @@
+{
+  "name": "ignite-firebase",
+  "description": "An Ignite plugin for react-native-firebase",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": {
+    "name": "Aleksi Pousar",
+    "email": "aleksi.pousar@aleksipousar.fi",
+    "url": "https://github.com/stoneman1"
+  },
+  "scripts": {
+    "lint": "standard",
+    "test": "ava",
+    "watch": "ava --watch",
+    "coverage": "nyc ava",
+    "shipit": "np"
+  },
+  "standard": {
+    "parser": "babel-eslint"
+  },
+  "url": "https://github.com/stoneman1/ignite-firebase",
+  "repository": "stoneman1/ignite-firebase",
+  "devDependencies": {
+    "ava": "^0.18.2",
+    "babel-eslint": "^7.1.1",
+    "np": "^2.12.0",
+    "nyc": "^10.1.2",
+    "sinon": "^1.17.7",
+    "standard": "^8.6.0"
+  }
+}
+
+
