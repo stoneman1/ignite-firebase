@@ -1,6 +1,8 @@
 # Ignite Firebase Plugin
 
-###THIS PLUGIN IS STILL IN VERY EARLY STAGE. USE AT OWN RISK.
+#THIS PLUGIN IS STILL IN VERY EARLY STAGE. USE AT OWN RISK.
+
+DOES NOT CURRENTLY HAVE REMOVING ABILITY.
 
 This plugin adds [react-native-firebase](https://github.com/invertase/react-native-firebase)
 to your [Ignite](https://github.com/infinitered/ignite) React Native project and
