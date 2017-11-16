@@ -1,7 +1,7 @@
 {
   "name": "ignite-firebase",
   "description": "An Ignite plugin for react-native-firebase",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": "MIT",
   "author": {
     "name": "Aleksi Pousar",
