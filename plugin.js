@@ -139,11 +139,6 @@ const add = async function (context) {
     insert: `${ANDROID_PACKAGES}`,
     after: `new MainReactPackage()`
   })
-  // Patch android/settings.gradle
-  ignite.patchInFile(`${APP_PATH}/android/settings.gradle`, {
-    insert: `${ANDROID_SETTINGS}`,
-    after: `rootProject.name = 'testingFirebasePlugin'`
-  })
   // Patch android/app/src/main/AndroidManifest.xml
   ignite.patchInFile(`${APP_PATH}/android/app/src/main/AndroidManifest.xml`, {
     insert: `${ANDROID_PERMISSIONS}`,
