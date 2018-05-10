@@ -1,5 +1,5 @@
 const NPM_MODULE_NAME = 'react-native-firebase'
-const EXAMPLE_FILE = 'FirebaseExample.js'
+const EXAMPLE_FILE = 'FirebaseExample.js.ejs'
 const APP_PATH = process.cwd()
 const PROJECT_NAME = process.cwd().split('/').pop()
 
