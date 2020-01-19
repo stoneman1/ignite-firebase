@@ -2,24 +2,84 @@
 
 #### THIS PLUGIN IS STILL IN VERY EARLY STAGE. USE AT OWN RISK.
 
+This plugin adds [react-native-firebase](https://github.com/invertase/react-native-firebase) to your [Ignite](https://github.com/infinitered/ignite) React Native project and configures it so it works out of the box with Ignite projects.
 
-This plugin adds [react-native-firebase](https://github.com/invertase/react-native-firebase)
-to your [Ignite](https://github.com/infinitered/ignite) React Native project and
-configures it so it works out of the box with Ignite projects.
+## Compatibility
+
+This version supports [react-native-firebase](https://github.com/invertase/react-native-firebase) `v6` and therefore is only compatible with [react-native](https://facebook.github.io/react-native) 0.60.0+
 
 ## Usage
-First go through [initial setup](https://rnfirebase.io/docs/master/installation/initial-setup) and get the GoogleService-Info.plist and google-services.json files ready and in the correct places. After that run:
-(if you don't have CocoaPods installed check [installation instructions for CocoaPods](https://guides.cocoapods.org/using/getting-started.html#getting-started))
 
+First get the credentials files from https://console.firebase.google.com/ as stated in:
+
+ * Android: https://invertase.io/oss/react-native-firebase/quick-start/android-firebase-credentials
+ * iOS: https://invertase.io/oss/react-native-firebase/quick-start/ios-firebase-credentials\n
+
+And put them:
+* `google-services.json` in `android/app/`
+* `GoogleService-Info.plist` in `ios/YourApp/`
+
+❌  DO NOT modify the native files, this plugin will take care of it  ⚠️
+
+### Adding Firebase
+
+Then:
+
+```sh
+ignite add firebase
+```
+
+You can also pass some information directly as CLI paramaters when adding the plugin: 
+
+* `--config-files-setup` : Use if you already set the google-services.json and GoogleService-Info.plist in your project
+* `--modules` : Firebase modules to install, to select in: 
+    * `AdMob`
+    * `Analytics`
+    * `Authentication`
+    * `Cloud Firestore`
+    * `Cloud Functions`
+    * `Cloud Messaging`
+    * `Cloud Storage`
+    * `Crashlytics`
+    * `Dynamic Links`
+    * `In-app Messaging`
+    * `Instance ID`
+    * `ML Kit Natural Language`
+    * `ML Kit Vision`
+    * `Performance Monitoring`
+    * `Realtime Database`
+    * `Remote Config`
+
+Examples:
 
 ```
-$ ignite add firebase
-$ cd ios && pod install
+ignite add firebase --modules=Analytics,"Cloud Functions"
+ignite add firebase --modules=all
+ignite add firebase --modules=Crashlytics --config-files-setup
 ```
 
-This adds `ignite-firebase`.
+You can get this information by using:
 
-If you want to use FCM for push notifications please check [3.1 and 3.2](http://invertase.io/react-native-firebase/#/installation-ios?id=_31-set-up-certificates)
+```sh
+ignite add firebase --help
+```
+
+### Removing Firebase
+
+```sh
+ignite remove firebase
+```
+
+Same here, you can use CLI parameters to convey some information:
+
+* `--remove-config-files` : Use if you want to remove the google-services.json and GoogleService-Info.plist files
+* `--modules` : Firebase modules to remove,  see above for more examples
+
+You can get this information by using:
+
+```sh
+ignite remove firebase --help
+```
 
 ## Contributing
 

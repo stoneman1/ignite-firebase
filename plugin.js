@@ -1,240 +1,578 @@
-const NPM_MODULE_NAME = 'react-native-firebase'
-const EXAMPLE_FILE = 'FirebaseExample.js.ejs'
-const APP_PATH = process.cwd()
-const PROJECT_NAME = process.cwd().split('/').pop()
+const NPM_MODULE_NAME = "@react-native-firebase/app";
+const NPM_MODULE_VERSION = "~6.2.0";
 
-const GRADLE_CONFIG_COMPILE = `    compile(project(':react-native-firebase')) {
-        transitive = false
-  }
-    compile "com.google.firebase:firebase-core:11.0.0"
-    compile "com.google.firebase:firebase-ads:11.0.0"
-    compile "com.google.firebase:firebase-analytics:11.0.0"
-    compile "com.google.firebase:firebase-auth:11.0.0"
-    compile "com.google.firebase:firebase-config:11.0.0"
-    compile "com.google.firebase:firebase-crash:11.0.0"
-    compile "com.google.firebase:firebase-database:11.0.0"
-    compile "com.google.firebase:firebase-messaging:11.0.0"
-    compile "com.google.firebase:firebase-perf:11.0.0"
-    compile "com.google.firebase:firebase-storage:11.0.0"`
+const IOS_INSERT_APPDELEGATE_1 = `@import Firebase;\n`;
+const IOS_INSERT_APPDELEGATE_2 = `  [FIRApp configure];`;
+const ANDROID_INSERT_BUILD_GRADLE = `        classpath("com.google.gms:google-services:4.2.0")`;
+const ANDROID_GOOGLE_SERVICES_PLUGIN = `apply plugin: 'com.google.gms.google-services'\n`;
 
-const ANDROID_IMPORTS = `import io.invertase.firebase.RNFirebasePackage;
-import io.invertase.firebase.admob.RNFirebaseAdMobPackage; //Firebase AdMob
-import io.invertase.firebase.analytics.RNFirebaseAnalyticsPackage; // Firebase Analytics
-import io.invertase.firebase.auth.RNFirebaseAuthPackage; // Firebase Auth
-import io.invertase.firebase.config.RNFirebaseRemoteConfigPackage; // Firebase Remote Config
-import io.invertase.firebase.crash.RNFirebaseCrashPackage; // Firebase Crash Reporting
-import io.invertase.firebase.database.RNFirebaseDatabasePackage; // Firebase Realtime Database
-import io.invertase.firebase.messaging.RNFirebaseMessagingPackage; // Firebase Cloud Messaging
-import io.invertase.firebase.perf.RNFirebasePerformancePackage; // Firebase Messaging
-import io.invertase.firebase.storage.RNFirebaseStoragePackage; // Firebase Storage`
+const ANDROID_PERF_BUILD_GRADLE = `        classpath("com.google.firebase:perf-plugin:1.3.1")`;
+const ANDROID_PERF_PLUGIN = `apply plugin: 'com.google.firebase.firebase-perf'\n`;
 
-const ANDROID_PACKAGES = `           new RNFirebasePackage(),
-           new RNFirebaseAdMobPackage(),
-           new RNFirebaseAnalyticsPackage(),
-           new RNFirebaseAuthPackage(),
-           new RNFirebaseRemoteConfigPackage(),
-           new RNFirebaseCrashPackage(),
-           new RNFirebaseDatabasePackage(),
-           new RNFirebaseMessagingPackage(),
-           new RNFirebasePerformancePackage(),
-           new RNFirebaseStoragePackage(),`
+const ANDROID_CRASHLYTICS_MAVEN = `        maven {\n          url("https://maven.fabric.io/public")\n        }`;
+const ANDROID_CRASHLYTICS_FABRIC_GRADLE = `        classpath("io.fabric.tools:gradle:1.28.1")`;
+const ANDROID_CRASHLYTICS_FABRIC_PLUGIN = `apply plugin: "io.fabric"`;
+const ANDROID_CRASHLYTICS_NDK = `\ncrashlytics {\n  enableNdk true\n}`;
 
-const ANDROID_SETTINGS = `include ':react-native-firebase'
-project(':react-native-firebase').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-firebase/android')`
+const UUID1 = `9D418FEC239FF80B00B0C90E`;
+const UUID2 = `9D418FEB239FF80A00B0C90E`;
+// Before /* End PBXBuildFile section */
+const IOS_GOOGLE_SERCICE_FILE_1 = `		${UUID1} /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = ${UUID2} /* GoogleService-Info.plist */; };`;
+// Before /* End PBXFileReference section */
+const IOS_GOOGLE_SERCICE_FILE_2 = `		${UUID2} /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };`;
+// Before /* main.jsbundle */,
+const IOS_GOOGLE_SERCICE_FILE_3 = `				${UUID2} /* GoogleService-Info.plist */,`;
+// After /* Images.xcassets in Resources */
+const IOS_GOOGLE_SERCICE_FILE_4 = `								${UUID1} /* GoogleService-Info.plist in Resources */,`;
+const UUID3 = `9D418FED239FFABA00B0C90E`;
+// After /* Bundle React Native code and images */,
+const IOS_EXTRA_SCRIPT_REF = `				${UUID3} /* ShellScript */,`;
+// Before /* [CP] Check Pods Manifest.lock */ = {
+const IOS_EXTRA_SCRIPT = `
+		${UUID3} /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\\"$\{PODS_ROOT\}/Fabric/run\\"";
+		};
+`;
 
-const ANDROID_PERMISSIONS = `<uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>`
+const createConfirmationMessage = slug =>
+    `You're ready to go! Check out https://invertase.io/oss/react-native-firebase/v6/${slug}/quick-start#module-usage to see how to use it!`;
+const getModuleName = slug => `@react-native-firebase/${slug}`;
 
-const OLD_ANDROID_PERMISSIONS = `<uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>`
+const MODULE_OPTIONS = [
+    {
+        name: "AdMob",
+        module: getModuleName("admob"),
+        warning:
+            'IMPORTANT: Ensure you update the "Contains ads" settings in the Google Play Store (via Pricing & Distribution tab).',
+        confirmationMessage: createConfirmationMessage("admob")
+    },
+    {
+        name: "Analytics",
+        module: getModuleName("analytics"),
+        confirmationMessage: createConfirmationMessage("analytics")
+    },
+    {
+        name: "Authentication",
+        module: getModuleName("auth"),
+        confirmationMessage: createConfirmationMessage("auth")
+    },
+    {
+        name: "Cloud Firestore",
+        module: getModuleName("firestore"),
+        confirmationMessage: createConfirmationMessage("firestore"),
+        dependencies: ["auth"]
+    },
+    {
+        name: "Cloud Functions",
+        module: getModuleName("functions"),
+        confirmationMessage: createConfirmationMessage("functions")
+    },
+    {
+        name: "Cloud Messaging",
+        module: getModuleName("messaging"),
+        confirmationMessage: createConfirmationMessage("messaging")
+    },
+    {
+        name: "Cloud Storage",
+        module: getModuleName("storage"),
+        confirmationMessage: createConfirmationMessage("storage")
+    },
+    {
+        name: "Crashlytics",
+        module: getModuleName("crashlytics"),
+        confirmationMessage: createConfirmationMessage("crashlytics"),
+        extraAddSteps: async (
+            APP_PATH,
+            { ignite, prompt, print, parameters }
+        ) => {
+            const packageJSON = require(`${APP_PATH}/package.json`);
+            const PROJECT_NAME = packageJSON.name;
+            // iOS Setup
+            ignite.patchInFile(
+                `${APP_PATH}/ios/${PROJECT_NAME}.xcodeproj/project.pbxproj`,
+                {
+                    insert: IOS_EXTRA_SCRIPT_REF,
+                    after: `\\/\\* Bundle React Native code and images \\*\\/,`
+                }
+            );
+            ignite.patchInFile(
+                `${APP_PATH}/ios/${PROJECT_NAME}.xcodeproj/project.pbxproj`,
+                {
+                    insert: IOS_EXTRA_SCRIPT,
+                    before: `\\/\\* \\[CP\\] Check Pods Manifest.lock \\*\\/ = {`
+                }
+            );
 
-const ANDROID_MESSAGING_SERVICE = `      <service
-        android:name="io.invertase.firebase.messaging.MessagingService"
-        android:enabled="true"
-        android:exported="true">
-        <intent-filter>
-          <action android:name="com.google.firebase.MESSAGING_EVENT" />
-        </intent-filter>
-      </service>
-      <service android:name="io.invertase.firebase.messaging.InstanceIdService" android:exported="false">
-        <intent-filter>
-          <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
-        </intent-filter>
-      </service>`
+            // Android Setup
+            ignite.patchInFile(`${APP_PATH}/android/build.gradle`, {
+                insert: ANDROID_CRASHLYTICS_MAVEN,
+                after: `jcenter()`
+            });
+            ignite.patchInFile(`${APP_PATH}/android/build.gradle`, {
+                insert: ANDROID_CRASHLYTICS_FABRIC_GRADLE,
+                after: `dependencies {`
+            });
+            ignite.patchInFile(`${APP_PATH}/android/app/build.gradle`, {
+                insert: ANDROID_CRASHLYTICS_FABRIC_PLUGIN,
+                after: `apply plugin: "com.android.application"`
+            });
+            ignite.patchInFile(`${APP_PATH}/android/app/build.gradle`, {
+                insert: ANDROID_CRASHLYTICS_NDK,
+                after: `apply plugin: "io.fabric"`
+            });
+        },
+        extraRemoveSteps: async (APP_PATH, { ignite, prompt, print }) => {
+            const packageJSON = require(`${APP_PATH}/package.json`);
+            const PROJECT_NAME = packageJSON.name;
+            // iOS Setup
+            ignite.patchInFile(
+                `${APP_PATH}/ios/${PROJECT_NAME}.xcodeproj/project.pbxproj`,
+                { delete: IOS_EXTRA_SCRIPT_REF }
+            );
+            ignite.patchInFile(
+                `${APP_PATH}/ios/${PROJECT_NAME}.xcodeproj/project.pbxproj`,
+                { delete: IOS_EXTRA_SCRIPT }
+            );
 
-const MESSAGING_FUNCTIONS_IOS = `-(void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification {
-  [RNFirebaseMessaging didReceiveLocalNotification:notification];
-}
+            // Android Setup
+            ignite.patchInFile(`${APP_PATH}/android/build.gradle`, {
+                delete: ANDROID_CRASHLYTICS_MAVEN
+            });
+            ignite.patchInFile(`${APP_PATH}/android/build.gradle`, {
+                delete: ANDROID_CRASHLYTICS_FABRIC_GRADLE
+            });
+            ignite.patchInFile(`${APP_PATH}/android/app/build.gradle`, {
+                delete: ANDROID_CRASHLYTICS_FABRIC_PLUGIN
+            });
+            ignite.patchInFile(`${APP_PATH}/android/app/build.gradle`, {
+                delete: ANDROID_CRASHLYTICS_NDK
+            });
+        }
+    },
+    {
+        name: "Dynamic Links",
+        module: getModuleName("dynamic-links"),
+        confirmationMessage: createConfirmationMessage("dynamic-links")
+    },
+    {
+        name: "In-app Messaging",
+        module: getModuleName("in-app-messaging"),
+        confirmationMessage: createConfirmationMessage("in-app-messaging")
+    },
+    {
+        name: "Instance ID",
+        module: getModuleName("iid"),
+        confirmationMessage: createConfirmationMessage("iid")
+    },
+    {
+        name: "ML Kit Natural Language",
+        module: getModuleName("ml-natural-language"),
+        confirmationMessage: createConfirmationMessage("ml-natural-language")
+    },
+    {
+        name: "ML Kit Vision",
+        module: getModuleName("ml-vision"),
+        confirmationMessage: createConfirmationMessage("ml-vision")
+    },
+    {
+        name: "Performance Monitoring",
+        module: getModuleName("perf"),
+        confirmationMessage: createConfirmationMessage("perf"),
+        extraAddSteps: async (APP_PATH, { ignite, patching }) => {
+            ignite.patchInFile(`${APP_PATH}/android/build.gradle`, {
+                insert: ANDROID_PERF_BUILD_GRADLE,
+                after: `dependencies {`
+            });
+            patching.append(
+                `${APP_PATH}/android/app/build.gradle`,
+                ANDROID_PERF_PLUGIN
+            );
+        },
+        extraRemoveSteps: async (APP_PATH, { ignite, patching }) => {
+            ignite.patchInFile(`${APP_PATH}/android/build.gradle`, {
+                delete: ANDROID_PERF_BUILD_GRADLE
+            });
+            ignite.patchInFile(`${APP_PATH}/android/app/build.gradle`, {
+                delete: ANDROID_PERF_PLUGIN
+            });
+        }
+    },
+    {
+        name: "Realtime Database",
+        module: getModuleName("database"),
+        confirmationMessage: createConfirmationMessage("database")
+    },
+    {
+        name: "Remote Config",
+        module: getModuleName("remote-config"),
+        confirmationMessage: createConfirmationMessage("remote-config")
+    }
+];
 
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(nonnull NSDictionary *)userInfo {
-  [RNFirebaseMessaging didReceiveRemoteNotification:userInfo];
-}
+const add = async function(toolbox) {
+    // Learn more about toolbox: https://infinitered.github.io/gluegun/#/toolbox-api.md
+    const { ignite, system, filesystem, print, patching, parameters } = toolbox;
 
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(nonnull NSDictionary *)userInfo
-fetchCompletionHandler:(nonnull void (^)(UIBackgroundFetchResult))completionHandler{
-  [RNFirebaseMessaging didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];
-}
-`
+    const PLUGIN_PATH = __dirname;
+    const APP_PATH = process.cwd();
+    const packageJSON = require(`${APP_PATH}/package.json`);
+    const PROJECT_NAME = packageJSON.name;
 
-const add = async function (context) {
-  // Learn more about context: https://infinitered.github.io/gluegun/#/context-api.md
-  const { ignite, filesystem } = context
+    if (parameters.options.help) {
+        print.info(`
+      Adding this plugin will help you install and configure Firebase for your React Native project.
 
-  // install a npm module
-  await ignite.addModule(NPM_MODULE_NAME, { link: false })
+      If you need to remove interactivity, you can specify most of the options as command-line parameters:
 
-  await ignite.addPluginComponentExample(EXAMPLE_FILE, { title: 'Firebase Example' })
+      --config-files-setup : Use if you already set the google-services.json and GoogleService-Info.plist
 
-  // Copy Podfile to correct place
-  if (!filesystem.exists(`${APP_PATH}/ios/Podfile`)) {
-    filesystem.copy(`${__dirname}/templates/Podfile`, `${APP_PATH}/ios/Podfile`)
-  }
+      --modules : Firebase modules to install, to select in: ${MODULE_OPTIONS.map(
+          item => item.name
+      ).join(", ")}
 
-  // Patch AppDelegate.m
-  ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.m`, {
-    insert: `#import <Firebase.h>\n#import "RNFirebaseMessaging.h"`,
-    after: `#import <React/RCTRootView.h>`
-  })
-  ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.m`, {
-    insert: `[FIRApp configure];\n[[UNUserNotificationCenter currentNotificationCenter] setDelegate:self];`,
-    before: `return YES;`
-  })
-  ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.m`, {
-    insert: `${MESSAGING_FUNCTIONS_IOS}`,
-    before: `@end`
-  })
-  // Patch AppDelegate.h
-  ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.h`, {
-    insert: `@import UserNotifications;`,
-    after: `#import <UIKit/UIKit.h>`
-  })
-  ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.h`, {
-    insert: `@interface AppDelegate : UIResponder <UIApplicationDelegate,UNUserNotificationCenterDelegate>`,
-    replace: `@interface AppDelegate : UIResponder <UIApplicationDelegate>`
-  })
-  // Patch android/build.gradle
-  ignite.patchInFile(`${APP_PATH}/android/build.gradle`, {
-    insert: `classpath 'com.google.gms:google-services:3.0.0'`,
-    after: `classpath 'com.android.tools.build:gradle:2.2.3'`
-  })
-  // Patch android/app/build.gradle
-  ignite.patchInFile(`${APP_PATH}/android/app/build.gradle`, {
-    insert: `apply plugin: 'com.google.gms.google-services'\n`,
-    before: `// Run this once to be able to run the application with BUCK`
-  })
-  ignite.patchInFile(`${APP_PATH}/android/app/build.gradle`, {
-    insert: `${GRADLE_CONFIG_COMPILE}`,
-    after: `dependencies {`
-  })
-  // Patch MainApplivation.java
-  ignite.patchInFile(`${APP_PATH}/android/app/src/main/java/com/${PROJECT_NAME}/MainApplication.java`, {
-    insert: `${ANDROID_IMPORTS}`,
-    after: `import com.facebook.react.ReactApplication;`
-  })
-  ignite.patchInFile(`${APP_PATH}/android/app/src/main/java/com/${PROJECT_NAME}/MainApplication.java`, {
-    insert: `${ANDROID_PACKAGES}`,
-    after: `new MainReactPackage()`
-  })
-  // Patch android/app/src/main/AndroidManifest.xml
-  ignite.patchInFile(`${APP_PATH}/android/app/src/main/AndroidManifest.xml`, {
-    insert: `${ANDROID_PERMISSIONS}`,
-    replace: `${OLD_ANDROID_PERMISSIONS}`
-  })
-  ignite.patchInFile(`${APP_PATH}/android/app/src/main/AndroidManifest.xml`, {
-    insert: `        android:launchMode="singleTop"`,
-    before: `android:windowSoftInputMode="adjustResize"`
-  })
-  ignite.patchInFile(`${APP_PATH}/android/app/src/main/AndroidManifest.xml`, {
-    insert: `${ANDROID_MESSAGING_SERVICE}`,
-    before: `</application>`
-  })
-}
+      ex: --modules=Analytics,"Cloud Functions" ("all" is also a valid value for --modules)
+    `);
+        process.exit();
+    }
+
+    if (packageJSON.dependencies["react-native"] < "0.60.0") {
+        print.error(
+            "Sorry, this package supports only react-native@0.60.0+ right now"
+        );
+        process.exit();
+    }
+
+    let isReady =
+        parameters.options.configFilesSetup ||
+        (await toolbox.prompt.confirm(
+            "Did you setup your project on the Firebase console and got the google services configuration files?"
+        ));
+
+    while (!isReady) {
+        print.warning(
+            "Please follow the steps to get the credentials files from https://console.firebase.google.com/ as stated in:\n * Android: https://invertase.io/oss/react-native-firebase/quick-start/android-firebase-credentials\n * iOS: https://invertase.io/oss/react-native-firebase/quick-start/ios-firebase-credentials\n"
+        );
+
+        const result = await system.run(
+            `cd ${APP_PATH}/android && ./gradlew signingReport | grep "> Task :app:signingReport" -A 45 | grep "Variant: debugAndroidTest$" -A 8 | grep "SHA1:"`,
+            { trimmed: true }
+        );
+
+        const splitResult = result ? result.split(": ") : [];
+        if (splitResult.length > 1 && splitResult[1]) {
+            print.warning(
+                `(optional) Your android Debug Signing certificate SHA1 is ${splitResult[1]}`
+            );
+        }
+
+        print.warning(
+            "❌  DO NOT modify the native files, this plugin will take care of it  ⚠️"
+        );
+        // print.warning('✅  DO drag and drop the GoogleService-Info.plist file into your .xcworkspace in XCode  ⚠️');
+
+        isReady = await toolbox.prompt.confirm(
+            `Got the google services configuration files set in ios/${packageJSON.name}/ and android/app/ ?`
+        );
+    }
+
+    await ignite.addModule(NPM_MODULE_NAME, {
+        link: false,
+        version: NPM_MODULE_VERSION
+    });
+
+    const spinner = print.spin("Patching iOS files");
+    // Patch AppDelegate.m for base config
+    ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.m`, {
+        insert: IOS_INSERT_APPDELEGATE_1,
+        before: `@implementation AppDelegate`
+    });
+    ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.m`, {
+        insert: IOS_INSERT_APPDELEGATE_2,
+        before: `return YES;`
+    });
+    ignite.patchInFile(
+        `${APP_PATH}/ios/${PROJECT_NAME}.xcodeproj/project.pbxproj`,
+        {
+            insert: IOS_GOOGLE_SERCICE_FILE_1,
+            before: "End PBXBuildFile section"
+        }
+    );
+    ignite.patchInFile(
+        `${APP_PATH}/ios/${PROJECT_NAME}.xcodeproj/project.pbxproj`,
+        {
+            insert: IOS_GOOGLE_SERCICE_FILE_2,
+            before: "End PBXFileReference section"
+        }
+    );
+    ignite.patchInFile(
+        `${APP_PATH}/ios/${PROJECT_NAME}.xcodeproj/project.pbxproj`,
+        {
+            insert: IOS_GOOGLE_SERCICE_FILE_3,
+            after: "main.jsbundle \\*\\/,"
+        }
+    );
+    ignite.patchInFile(
+        `${APP_PATH}/ios/${PROJECT_NAME}.xcodeproj/project.pbxproj`,
+        {
+            insert: IOS_GOOGLE_SERCICE_FILE_4,
+            before: "Images.xcassets in Resources \\*\\/,"
+        }
+    );
+    spinner.succeed("Patched iOS files");
+
+    spinner.text = "Updating pods (this will probably take a while)";
+    spinner.start();
+    await system.spawn("pod install", { cwd: `${APP_PATH}/ios` });
+    spinner.succeed("Updated pods");
+
+    spinner.text = "Patching Android files";
+    spinner.start();
+    // Patch android/build.gradle
+    ignite.patchInFile(`${APP_PATH}/android/build.gradle`, {
+        insert: ANDROID_INSERT_BUILD_GRADLE,
+        after: `dependencies {`
+    });
+    // Patch android/app/build.gradle
+    patching.append(
+        `${APP_PATH}/android/app/build.gradle`,
+        ANDROID_GOOGLE_SERVICES_PLUGIN
+    );
+    spinner.succeed("Patched Android files");
+
+    let modulesToInstall;
+
+    if (!parameters.options.modules) {
+        const { submodules } = await toolbox.prompt.ask({
+            type: "multiselect",
+            name: "submodules",
+            message: "Which firebase services do you need?",
+            choices: MODULE_OPTIONS
+        });
+
+        modulesToInstall = submodules;
+    } else if (parameters.options.modules === "all") {
+        modulesToInstall = MODULE_OPTIONS.map(item => item.name);
+    } else {
+        modulesToInstall = parameters.options.modules
+            .split(",")
+            .map(item => item.trim());
+    }
+
+    for (let index = 0; index < modulesToInstall.length; index++) {
+        const moduleName = modulesToInstall[index];
+        const moduleOptions = MODULE_OPTIONS.find(
+            item => item.name === moduleName
+        );
+
+        print.warning(`Installing module ${moduleName}`);
+
+        await ignite.addModule(moduleOptions.module, {
+            link: false,
+            version: NPM_MODULE_VERSION
+        });
+
+        if (moduleOptions.warning) {
+            print.warning(moduleOptions.warning);
+        }
+
+        if (moduleOptions.extraAddSteps) {
+            await moduleOptions.extraAddSteps(APP_PATH, toolbox);
+        }
+
+        if (moduleOptions.confirmationMessage) {
+            print.success(moduleOptions.confirmationMessage);
+        }
+    }
+
+    if (modulesToInstall.length > 0) {
+        await system.spawn("pod install", { cwd: `${APP_PATH}/ios` });
+    }
+
+    print.success("You are all set!");
+};
 
 /**
  * Remove yourself from the project.
  */
-const remove = async function (context) {
-  // Learn more about context: https://infinitered.github.io/gluegun/#/context-api.md
-  const { ignite, filesystem } = context
+const remove = async function(toolbox) {
+    // Learn more about toolbox: https://infinitered.github.io/gluegun/#/toolbox-api.md
+    const { ignite, system, filesystem, print, patching, parameters } = toolbox;
 
-  // remove the npm module and unlink it
-  await ignite.removeModule(NPM_MODULE_NAME, { unlink: false })
+    const PLUGIN_PATH = __dirname;
+    const APP_PATH = process.cwd();
+    const packageJSON = require(`${APP_PATH}/package.json`);
+    const PROJECT_NAME = packageJSON.name;
 
-  await ignite.removePluginComponentExample(EXAMPLE_FILE)
+    if (parameters.options.help) {
+        print.info(`
+      If you need to remove interactivity, you can specify most of the options as command-line parameters:
 
-  // remove Podfile
-  if (filesystem.exists(`${APP_PATH}/ios/Podfile`)) {
-    filesystem.remove(`${APP_PATH}/ios/Podfile`)
-  }
+      --remove-config-files : Use if you want to remove the google-services.json and GoogleService-Info.plist files
 
-  // Patch AppDelegate.m
-  ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.m`, {
-    delete: `#import <Firebase.h>\n#import "RNFirebaseMessaging.h"`
-  })
-  ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.m`, {
-    delete: `[FIRApp configure];\n[[UNUserNotificationCenter currentNotificationCenter] setDelegate:self];`
-  })
-  ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.m`, {
-    delete: `${MESSAGING_FUNCTIONS_IOS}`
-  })
-  // Patch AppDelegate.h
-  ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.h`, {
-    delete: `@import UserNotifications;`
-  })
-  ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.h`, {
-    insert: `@interface AppDelegate : UIResponder <UIApplicationDelegate>`,
-    replace: `@interface AppDelegate : UIResponder <UIApplicationDelegate,UNUserNotificationCenterDelegate>`
-  })
-  // Patch android/build.gradle
-  ignite.patchInFile(`${APP_PATH}/android/build.gradle`, {
-    delete: `classpath 'com.google.gms:google-services:3.0.0'`
-  })
-  // Patch android/app/build.gradle
-  ignite.patchInFile(`${APP_PATH}/android/app/build.gradle`, {
-    delete: `apply plugin: 'com.google.gms.google-services'\n`
-  })
-  ignite.patchInFile(`${APP_PATH}/android/app/build.gradle`, {
-    delete: `${GRADLE_CONFIG_COMPILE}`
-  })
-  // Patch MainApplivation.java
-  ignite.patchInFile(`${APP_PATH}/android/app/src/main/java/com/${PROJECT_NAME}/MainApplication.java`, {
-    delete: `${ANDROID_IMPORTS}`
-  })
-  ignite.patchInFile(`${APP_PATH}/android/app/src/main/java/com/${PROJECT_NAME}/MainApplication.java`, {
-    delete: `${ANDROID_PACKAGES}`
-  })
-  // Patch android/settings.gradle
-  ignite.patchInFile(`${APP_PATH}/android/settings.gradle`, {
-    delete: `${ANDROID_SETTINGS}`
-  })
-  // Patch android/app/src/main/AndroidManifest.xml
-  ignite.patchInFile(`${APP_PATH}/android/app/src/main/AndroidManifest.xml`, {
-    insert: `${OLD_ANDROID_PERMISSIONS}`,
-    replace: `${ANDROID_PERMISSIONS}`
-  })
-  ignite.patchInFile(`${APP_PATH}/android/app/src/main/AndroidManifest.xml`, {
-    delete: `        android:launchMode="singleTop"`
-  })
-  ignite.patchInFile(`${APP_PATH}/android/app/src/main/AndroidManifest.xml`, {
-    delete: `${ANDROID_MESSAGING_SERVICE}`
-  })
+      --modules : Firebase modules to remove, to select in: ${MODULE_OPTIONS.map(
+          item => item.name
+      ).join(", ")}
 
-  // Example of removing App/Firebase folder
-  // const removeFirebase = await context.prompt.confirm(
-  //   'Do you want to remove App/Firebase?'
-  // )
-  // if (removeFirebase) { filesystem.remove(`${APP_PATH}/App/Firebase`) }
+      ex: --modules=Analytics,"Cloud Functions" ("all" is also a valid value for --modules)
+    `);
+        process.exit();
+    }
 
-  // Example of unpatching a file
-  // ignite.patchInFile(`${APP_PATH}/App/Config/AppConfig.js`, {
-  //   delete: `import '../Firebase/Firebase'\n`
-  // )
-}
+    let allOrSelected;
+    if (!parameters.options.modules) {
+        const { choice } = await toolbox.prompt.ask({
+            type: "select",
+            name: "choice",
+            message: "Do you want to remove the whole library, or just a part?",
+            choices: [{ name: "EVERYTHING" }, { name: "ONLY SOME MODULES" }]
+        });
+
+        allOrSelected = choice;
+    }
+
+    let submodulesToRemove = [];
+
+    if (
+        allOrSelected === "EVERYTHING" ||
+        parameters.options.modules === "all"
+    ) {
+        const removeConfigFiles =
+            parameters.options.removeConfigFiles !== undefined
+                ? parameters.options.removeConfigFiles
+                : await toolbox.prompt.confirm(
+                      `Do you want us to remove the google services configuration files set in ios/${packageJSON.name}/ and android/app/ ?`
+                  );
+
+        if (removeConfigFiles) {
+            filesystem.delete(`${APP_PATH}/android/app/google-services.json`);
+            filesystem.delete(
+                `${APP_PATH}/ios/${PROJECT_NAME}/GoogleService-Info.plist`
+            );
+
+            // Remove reference from XCode proj
+            if (parameters.options.removeConfigFiles !== undefined) {
+                print.warning(
+                    `You still need to remove the GoogleService-Info.plist from your iOS project by opening ios/${PROJECT_NAME}.xcworkspace and delete it from the tree left.`
+                );
+            } else {
+                let isIOSGoogleServiceFileRemoved = false;
+                while (!isIOSGoogleServiceFileRemoved) {
+                    isIOSGoogleServiceFileRemoved = await toolbox.prompt.confirm(
+                        `You need to remove the GoogleService-Info.plist from your iOS project by opening ios/${PROJECT_NAME}.xcworkspace and delete it from the tree left. Once that's done, continue?`
+                    );
+                }
+            }
+        }
+
+        await ignite.removeModule(NPM_MODULE_NAME, { unlink: false });
+
+        const spinner = print.spin("Unpatching iOS files");
+        // Patch AppDelegate.m for base config
+        ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.m`, {
+            delete: IOS_INSERT_APPDELEGATE_1
+        });
+        ignite.patchInFile(`${APP_PATH}/ios/${PROJECT_NAME}/AppDelegate.m`, {
+            delete: IOS_INSERT_APPDELEGATE_2
+        });
+        ignite.patchInFile(
+            `${APP_PATH}/ios/${PROJECT_NAME}.xcodeproj/project.pbxproj`,
+            { delete: IOS_GOOGLE_SERCICE_FILE_1 }
+        );
+        ignite.patchInFile(
+            `${APP_PATH}/ios/${PROJECT_NAME}.xcodeproj/project.pbxproj`,
+            { delete: IOS_GOOGLE_SERCICE_FILE_2 }
+        );
+        ignite.patchInFile(
+            `${APP_PATH}/ios/${PROJECT_NAME}.xcodeproj/project.pbxproj`,
+            { delete: IOS_GOOGLE_SERCICE_FILE_3 }
+        );
+        ignite.patchInFile(
+            `${APP_PATH}/ios/${PROJECT_NAME}.xcodeproj/project.pbxproj`,
+            { delete: IOS_GOOGLE_SERCICE_FILE_4 }
+        );
+        spinner.succeed("Unpatched iOS files");
+
+        spinner.text = "Updating pods (this will probably take a while)";
+        spinner.start();
+        await system.spawn("pod install", { cwd: `${APP_PATH}/ios` });
+        spinner.succeed("Updated pods");
+
+        spinner.text = "Unpatching Android files";
+        spinner.start();
+        // Patch android/build.gradle
+        // WARNING: We might not want to remove the google-services there... A lot of other stuff are using that.
+        // ignite.patchInFile(`${APP_PATH}/android/build.gradle`, { delete: ANDROID_INSERT_BUILD_GRADLE })
+        // Patch android/app/build.gradle
+        ignite.patchInFile(`${APP_PATH}/android/app/build.gradle`, {
+            delete: ANDROID_GOOGLE_SERVICES_PLUGIN
+        });
+        spinner.succeed("Unpatched Android files");
+
+        submodulesToRemove = MODULE_OPTIONS.map(item => item.name);
+    } else if (!parameters.options.modules) {
+        const { submodules } = await toolbox.prompt.ask({
+            type: "multiselect",
+            name: "submodules",
+            message: "Which firebase services do you need?",
+            choices: MODULE_OPTIONS
+        });
+
+        submodulesToRemove = submodules;
+    } else {
+        submodulesToRemove = parameters.options.modules
+            .split(",")
+            .map(item => item.trim());
+    }
+
+    print.warning(submodulesToRemove);
+
+    for (let index = 0; index < submodulesToRemove.length; index++) {
+        const moduleName = submodulesToRemove[index];
+        const moduleOptions = MODULE_OPTIONS.find(
+            item => item.name === moduleName
+        );
+
+        print.warning(`Removing module ${moduleName}`);
+
+        try {
+            await ignite.removeModule(moduleOptions.module, { unlink: false });
+
+            if (moduleOptions.warning) {
+                print.warning(moduleOptions.warning);
+            }
+
+            if (moduleOptions.extraRemoveSteps) {
+                await moduleOptions.extraRemoveSteps(APP_PATH, toolbox);
+            }
+
+            if (moduleOptions.confirmationMessage) {
+                print.success(`${moduleName} has been removed successfully`);
+            }
+        } catch (e) {
+            print.warning(`Could not remove ${moduleName}: ${e.message}`);
+        }
+    }
+
+    if (submodulesToRemove.length > 0) {
+        await system.spawn("pod install", { cwd: `${APP_PATH}/ios` });
+    }
+
+    print.success("Farewell, my friend!");
+};
 
 // Required in all Ignite plugins
-module.exports = { add, remove }
-
+module.exports = { add, remove };
